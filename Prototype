@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 //  Replace this with your real key from https://makersuite.google.com/app/apikey
-const API_KEY = "AIzaSyB-kL5Ay6wCkMZ7TBiuG7c0SbTBOsJoO0Y";
+const API_KEY = "AIz******************Y";
 
 function App() {
   const [input, setInput] = useState("");
