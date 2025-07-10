@@ -1,0 +1,68 @@
+import React, { useState } from "react";
+
+//  Replace this with your real key from https://makersuite.google.com/app/apikey
+const API_KEY = "AIzaSyB-kL5Ay6wCkMZ7TBiuG7c0SbTBOsJoO0Y";
+
+function App() {
+  const [input, setInput] = useState("");
+  const [response, setResponse] = useState("");
+
+  const handleGenerate = async () => {
+    setResponse("Generating...");
+
+    try {
+      const res = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=" + API_KEY,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: input
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      );
+
+      const data = await res.json();
+      console.log("✅ Gemini API response:", data);
+
+      if (data.candidates && data.candidates.length > 0) {
+        setResponse(data.candidates[0].content.parts[0].text);
+      } else {
+        setResponse("❌ No valid response. Try again.\n\n" + JSON.stringify(data, null, 2));
+      }
+    } catch (err) {
+      console.error("❌ Error:", err);
+      setResponse("⚠️ Error: " + err.message);
+    }
+  };
+
+  return (
+    <div style={{ padding: 30 }}>
+      <h2>🧠 Sahayak – AI Teaching Assistant</h2>
+      <textarea
+        rows={4}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Enter your question here..."
+        style={{ width: "100%", padding: 10 }}
+      />
+      <br />
+      <button onClick={handleGenerate} style={{ marginTop: 10, padding: 10 }}>
+        Generate
+      </button>
+      <pre style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>{response}</pre>
+    </div>
+  );
+}
+
+export default App;
