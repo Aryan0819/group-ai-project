@@ -1,0 +1,44 @@
+const functions = require("firebase-functions");
+const express = require("express");
+const cors = require("cors")({ origin: true });
+const multer = require("multer");
+const fs = require("fs");
+const { GoogleGenerativeAI, GoogleGenerativeAIFilePart } = require("@google/generative-ai");
+
+const app = express();
+app.use(cors);
+app.use(express.json());
+
+// Use multer for image uploads (stored temporarily)
+const upload = multer({ dest: "/tmp/" });
+
+//  Paste your Gemini API key below
+const genAI = new GoogleGenerativeAI("AIzaSyXXXXXX_Your_Real_API_Key_Here");
+
+//  POST route for uploading textbook image
+app.post("/upload-image", upload.single("image"), async (req, res) => {
+  try {
+    const gradeLevels = req.body.grades || "Grade 2 and Grade 5";
+    const filePath = req.file.path;
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+    const imagePart = new GoogleGenerativeAIFilePart({
+      mimeType: req.file.mimetype,
+      data: fs.readFileSync(filePath),
+    });
+
+    const result = await model.generateContent([
+      `Generate two sets of worksheets for ${gradeLevels} based on the textbook image.`,
+      imagePart,
+    ]);
+
+    const text = result.response.text();
+    res.send({ response: text });
+  } catch (err) {
+    console.error("Vision error:", err);
+    res.status(500).send("Vision processing failed.");
+  }
+});
+
+exports.ai = functions.https.onRequest(app);
