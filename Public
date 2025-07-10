@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Image to Worksheet Generator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, button { width: 100%; padding: 10px; margin-top: 10px; }
+    #response { white-space: pre-wrap; margin-top: 15px; background: #f0f0f0; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Sahayak: Textbook to Worksheet</h2>
+  <input type="file" id="image" accept="image/*">
+  <input type="text" id="grades" placeholder="Enter grades (e.g., Grade 2 and 5)">
+  <button onclick="uploadImage()">Generate Worksheet</button>
+  <div id="response"></div>
+
+  <script>
+    async function uploadImage() {
+      const file = document.getElementById("image").files[0];
+      const grades = document.getElementById("grades").value || "Grade 2 and 5";
+      const resBox = document.getElementById("response");
+
+      if (!file) return alert("Please select an image.");
+
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("grades", grades);
+
+      resBox.textContent = "Generating...";
+
+      try {
+        const res = await fetch("/ai/upload-image", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        resBox.textContent = data.response || "No response.";
+      } catch (err) {
+        resBox.textContent = "Failed to generate.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
